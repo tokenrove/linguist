@@ -22,6 +22,8 @@ module Linguist
       @cache ||= begin
         serializer = defined?(Yajl) ? Yajl : YAML
         serializer.load(File.read(PATH))
+      rescue Errno::ENOENT
+        Hash.new { |_| Hash.new { |_| [] } }
       end
     end
 
@@ -75,7 +77,8 @@ module Linguist
       db['filenames'] = {}
 
       each do |sample|
-        language_name = sample[:language]
+        language = Language[sample[:language]]
+        language_name = language ? language.name : sample[:language]
 
         if sample[:extname]
           db['extnames'][language_name] ||= []
